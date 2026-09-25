@@ -1,0 +1,535 @@
+{
+  "info": {
+    "_postman_id": "a1b2c3d4-e5f6-4a5b-9c8d-7e6f5a4b3c2d",
+    "name": "Doctor Tracker API",
+    "description": "Production-ready Postman collection for the Doctor Tracker REST API backend. Covers Auth, Doctors, Patients, and Dashboard analytics.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var jsonResponse = pm.response.json();",
+                  "    if (jsonResponse.data && jsonResponse.data.token) {",
+                  "        pm.environment.set(\"token\", jsonResponse.data.token);",
+                  "        console.log(\"✅ Token successfully saved to {{token}} environment variable!\");",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@doctortracker.com\",\n  \"password\": \"Admin123!\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "login"]
+            },
+            "description": "Authenticate admin user and automatically persist the JWT into the {{token}} environment variable."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Current User Profile",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/auth/me",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "me"]
+            },
+            "description": "Fetch current authenticated admin user profile (password excluded)."
+          },
+          "response": []
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/auth/logout",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "logout"]
+            },
+            "description": "Clear session and invalidate httpOnly auth cookie."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Doctors",
+      "item": [
+        {
+          "name": "Create Doctor",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    var json = pm.response.json();",
+                  "    if (json.data && json.data._id) {",
+                  "        pm.environment.set(\"doctorId\", json.data._id);",
+                  "        console.log(\"Saved doctorId:\", json.data._id);",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Dr. Sarah Connor\",\n  \"specialization\": \"Cardiology\",\n  \"hospital\": \"Metro General Hospital\",\n  \"phone\": \"+1-555-0101\",\n  \"email\": \"sarah.connor@metrohospital.org\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/doctors",
+              "host": ["{{baseUrl}}"],
+              "path": ["doctors"]
+            },
+            "description": "Create a new doctor document. Creator admin is automatically attached."
+          },
+          "response": []
+        },
+        {
+          "name": "List Doctors",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/doctors?page=1&limit=10&search=&specialization=&from=&to=",
+              "host": ["{{baseUrl}}"],
+              "path": ["doctors"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": "Page number (defaults to 1)",
+                  "disabled": false
+                },
+                {
+                  "key": "limit",
+                  "value": "10",
+                  "description": "Items per page (max 100)",
+                  "disabled": false
+                },
+                {
+                  "key": "search",
+                  "value": "Cardiology",
+                  "description": "Full-text search on name, specialization, hospital",
+                  "disabled": true
+                },
+                {
+                  "key": "specialization",
+                  "value": "Cardiology",
+                  "description": "Exact specialization filter",
+                  "disabled": true
+                },
+                {
+                  "key": "from",
+                  "value": "2026-01-01",
+                  "description": "Start date for createdAt filter (YYYY-MM-DD)",
+                  "disabled": true
+                },
+                {
+                  "key": "to",
+                  "value": "2026-12-31",
+                  "description": "End date for createdAt filter (YYYY-MM-DD)",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "List all doctors with text search, specialization filtering, date ranges, and pagination."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Doctor by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/doctors/{{doctorId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["doctors", "{{doctorId}}"]
+            },
+            "description": "Retrieve detailed information for a single doctor by ObjectId."
+          },
+          "response": []
+        },
+        {
+          "name": "Update Doctor",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"hospital\": \"Metro Advanced Cardiac Institute\",\n  \"phone\": \"+1-555-9999\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/doctors/{{doctorId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["doctors", "{{doctorId}}"]
+            },
+            "description": "Partially or fully update a doctor's information."
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Doctor",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/doctors/{{doctorId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["doctors", "{{doctorId}}"]
+            },
+            "description": "Delete a doctor document by ObjectId."
+          },
+          "response": []
+        },
+        {
+          "name": "List Patients for Doctor",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/doctors/{{doctorId}}/patients?page=1&limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["doctors", "{{doctorId}}", "patients"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": false
+                },
+                {
+                  "key": "limit",
+                  "value": "10",
+                  "disabled": false
+                }
+              ]
+            },
+            "description": "Fetch paginated patients currently assigned to a specific doctor."
+          },
+          "response": []
+        },
+        {
+          "name": "Add Patient under Doctor",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    var json = pm.response.json();",
+                  "    if (json.data && json.data._id) {",
+                  "        pm.environment.set(\"patientId\", json.data._id);",
+                  "        console.log(\"Saved patientId:\", json.data._id);",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"John Doe\",\n  \"age\": 45,\n  \"gender\": \"male\",\n  \"condition\": \"Hypertension\",\n  \"phone\": \"+1-555-1234\",\n  \"email\": \"john.doe@example.com\",\n  \"visitDate\": \"2026-09-24\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/doctors/{{doctorId}}/patients",
+              "host": ["{{baseUrl}}"],
+              "path": ["doctors", "{{doctorId}}", "patients"]
+            },
+            "description": "Add a new patient under the specified doctor."
+          },
+          "response": []
+        },
+        {
+          "name": "Remove Patient from Doctor",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/doctors/{{doctorId}}/patients/{{patientId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["doctors", "{{doctorId}}", "patients", "{{patientId}}"]
+            },
+            "description": "Remove a patient under a doctor, verifying the patient belongs to that doctor."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Patients",
+      "item": [
+        {
+          "name": "List All Patients",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/patients?page=1&limit=10&search=&condition=&doctorId=&from=&to=",
+              "host": ["{{baseUrl}}"],
+              "path": ["patients"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": "Page number (default 1)",
+                  "disabled": false
+                },
+                {
+                  "key": "limit",
+                  "value": "10",
+                  "description": "Items per page (max 100)",
+                  "disabled": false
+                },
+                {
+                  "key": "search",
+                  "value": "John",
+                  "description": "Text search on patient name or condition",
+                  "disabled": true
+                },
+                {
+                  "key": "condition",
+                  "value": "Hypertension",
+                  "description": "Exact condition filter",
+                  "disabled": true
+                },
+                {
+                  "key": "doctorId",
+                  "value": "{{doctorId}}",
+                  "description": "Filter by assigned doctor ID",
+                  "disabled": true
+                },
+                {
+                  "key": "from",
+                  "value": "2026-09-01",
+                  "description": "Visit date start range (YYYY-MM-DD)",
+                  "disabled": true
+                },
+                {
+                  "key": "to",
+                  "value": "2026-09-30",
+                  "description": "Visit date end range (YYYY-MM-DD)",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Dedicated patients list endpoint supporting full-text search, condition filter, doctor filter, visit date range, and pagination."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Patient by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/patients/{{patientId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["patients", "{{patientId}}"]
+            },
+            "description": "Fetch a single patient with populated doctor information."
+          },
+          "response": []
+        },
+        {
+          "name": "Update Patient",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"condition\": \"Managed Hypertension\",\n  \"age\": 46\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/patients/{{patientId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["patients", "{{patientId}}"]
+            },
+            "description": "Update patient fields."
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Patient",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/patients/{{patientId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["patients", "{{patientId}}"]
+            },
+            "description": "Delete a patient document by ObjectId."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Dashboard",
+      "item": [
+        {
+          "name": "Get Dashboard Summary",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/dashboard/summary",
+              "host": ["{{baseUrl}}"],
+              "path": ["dashboard", "summary"]
+            },
+            "description": "Retrieve totalDoctors and totalPatients counts via concurrent database countDocuments."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Patients Per Doctor",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/dashboard/patients-per-doctor",
+              "host": ["{{baseUrl}}"],
+              "path": ["dashboard", "patients-per-doctor"]
+            },
+            "description": "Single aggregation pipeline grouping patients by doctor, joining doctor profile, and sorting by patientCount descending."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Stats by Date (Daily)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/dashboard/stats-by-date?groupBy=day",
+              "host": ["{{baseUrl}}"],
+              "path": ["dashboard", "stats-by-date"],
+              "query": [
+                {
+                  "key": "groupBy",
+                  "value": "day",
+                  "description": "Group by 'day' (YYYY-MM-DD)"
+                }
+              ]
+            },
+            "description": "Patient visit trends grouped by calendar day, sorted chronologically."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Stats by Date (Monthly)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/dashboard/stats-by-date?groupBy=month",
+              "host": ["{{baseUrl}}"],
+              "path": ["dashboard", "stats-by-date"],
+              "query": [
+                {
+                  "key": "groupBy",
+                  "value": "month",
+                  "description": "Group by 'month' (YYYY-MM)"
+                }
+              ]
+            },
+            "description": "Patient visit trends grouped by calendar month, sorted chronologically."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "System",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/health",
+              "host": ["{{baseUrl}}"],
+              "path": ["health"]
+            },
+            "description": "Public health check endpoint returning server status, uptime, and MongoDB connection readyState."
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
