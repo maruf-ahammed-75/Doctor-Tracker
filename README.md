@@ -230,14 +230,18 @@ flowchart TD
 *Mobile-optimized interface featuring stacked cards, a responsive drawer navigation, and touch-friendly charts.*
 
 ---
-
 ## 🔑 Submission Details
 
 | Detail | Value / Link |
+|---|---|
 | **GitHub Repository** | [https://github.com/maruf-ahammed-75/Doctor-Tracker](https://github.com/maruf-ahammed-75/Doctor-Tracker) |
 | **Live Frontend** | [https://doctor-tracker-frontend-zeta.vercel.app](https://doctor-tracker-frontend-zeta.vercel.app) |
 | **Live Backend API** | [https://doctor-tracker-7y6n.onrender.com/api](https://doctor-tracker-7y6n.onrender.com/api) |
+| **Backend REST API (local dev)** | `http://localhost:5000/api` |
+| **Frontend Web App (local dev)** | `http://localhost:3000` |
+| **Admin Login** | Create your own via `npm run seed:admin` — see Setup Guide Step 2.3. No default credentials are published here. |
 
+> ℹ️ **Note:** The backend runs on Render's free tier, which spins down after inactivity. The first request after idle time may take 30–60 seconds to respond while the server wakes up.
 ---
 
 ## 🔌 Complete API Endpoint Reference
